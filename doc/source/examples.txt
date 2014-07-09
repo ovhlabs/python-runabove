@@ -1,0 +1,97 @@
+To communicate with the API, each call made by your application must be signed
+and include the consumer key of the user. The signature process is
+automatically handled by the SDK. However if the user don't have a valid
+consumer key yet you can redirect him to RunAbove authentication page with the
+following code::
+
+
+    from runabove import Runabove
+
+    application_key = 'your_app_key'
+    application_secret = 'your_app_secret'
+
+    # Create an instance of Runabove SDK interface
+    run = Runabove(application_key, application_secret)
+
+    # Request an URL to securely authenticate the user
+    print "You should login here: %s" % run.get_login_url()
+    raw_input("When you are logged, press Enter")
+
+    # Show the consumer key
+    print "Your consumer key is: %s" % run.get_consumer_key()
+
+How to manage instances?
+------------------------
+
+Launching an instance is easy. First get the flavor, image and region where you
+want your instance to be created and call `Runabove.instances.create()`. To
+delete an instance just call the `instance.delete()` method::
+
+    from runabove import Runabove
+
+    application_key = 'your_app_key'
+    application_secret = 'your_app_secret'
+    consumer_key = 'your_consumer_key'
+
+    # Create the Runabove SDK interface
+    run = Runabove(application_key,
+                   application_secret,
+                   consumer_key=consumer_key)
+
+    # Get a region, flavor and image
+    region = run.regions.list().pop()
+    flavor = run.flavors.list_by_region(region).pop()
+    image = run.images.list_by_region(region).pop()
+
+    # Launch a new instance
+    instance = run.instances.create(region, 'My instance', flavor, image)
+
+    # List instances
+    print 'Instances:'
+    for i in run.instances.list():
+        print ' - %s (%s)' % (i.name, i.image.name)
+
+    # Delete the newly created instance
+    instance.delete()
+    print '%s deleted' % instance.name
+
+How to use storage?
+-------------------
+::
+
+    from runabove import Runabove
+
+    application_key = 'your_app_key'
+    application_secret = 'your_app_secret'
+    consumer_key = 'your_consumer_key'
+
+    # Create an instance of Runabove SDK interface
+    run = Runabove(application_key,
+                   application_secret,
+                   consumer_key=consumer_key)
+
+    # Get a region available
+    region = run.regions.list().pop()
+
+    # Create a new container
+    container_name = 'storage_test'
+    container = run.containers.create(region, container_name)
+    print "Storage container '%s' created" % container.name
+
+    # Create a new object
+    object_name = 'object.txt'
+    container.create_object(object_name, 'This is the content')
+    print "Object '%s' created" % object_name
+
+    # List objects of the container
+    print "Objects in '%s':" % container.name
+    for obj in container.list_objects():
+        print " - %s (%d bytes)" % (obj.name, obj.size)
+
+    # Delete the object
+    obj.delete()
+    print "Object '%s' deleted" % obj.name
+
+    # Delete the container
+    container.delete()
+    print "Storage container '%s' deleted" % container.name

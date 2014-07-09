@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Picture - Facecat</title>
+
+    <!-- Bootstrap -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link href="/static/css/facecat.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="main" class="container">
+
+<!-- Navbar -->
+      <div class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Facecat</a>
+          </div>
+          <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+              <li class="active"><a href="/"><span class="glyphicon glyphicon-big glyphicon-cloud-upload"></span> Upload</a></li>
+              <li><a href="/all"><span class="glyphicon glyphicon-big glyphicon-picture"></span> Generated</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </div>
+<!-- /Navbar -->
+
+<!-- Content -->
+      <div>
+        <h1>And the result is&hellip;</h1>
+        <div class="text-center padded">
+          <img src="{{obj.url}}" alt="Facecatted">
+        </div>
+        <div class="row">
+          <div class="col-xs-3 col-xs-offset-8">
+            <a class="btn btn-sm btn-primary" href="{{obj.url}}" download="{{obj.name}}" role="button"><span class="glyphicon glyphicon-big glyphicon-cloud-download"></span> Download</a>
+            <a class="btn btn-sm btn-danger" href="/delete/{{obj.name}}" role="button"><span class="glyphicon glyphicon-big glyphicon-trash"></span> Delete</a>
+          </div>
+        </div>
+      </div>
+<!-- /Content -->
+
+    </div><!--/.container -->
+
+    <script src="/static/js/jquery-1.11.0.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+  </body>
+</html>
+

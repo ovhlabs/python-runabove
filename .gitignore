@@ -1,0 +1,6 @@
+*.pyc
+
+build/
+dist/
+python_runabove.egg-info/
+venv/

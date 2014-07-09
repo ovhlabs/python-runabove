@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Facecat</title>
+
+    <!-- Bootstrap -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link href="/static/css/facecat.css" rel="stylesheet">
+  </head>
+  <body>
+    
+    <div id="main" class="container">
+
+<!-- Navbar -->
+      <div class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Facecat</a>
+          </div>
+          <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+              <li class="active"><a href="/"><span class="glyphicon glyphicon-big glyphicon-cloud-upload"></span> Upload</a></li>
+              <li><a href="/all"><span class="glyphicon glyphicon-big glyphicon-picture"></span> Generated</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </div>
+<!-- /Navbar -->
+
+<!-- Content -->
+      % if 'error' in locals():
+      <div class="alert alert-danger">An error happend while processing your request.</div>
+      % end
+      <div>
+        <h1>Upload a picture <small> It's more fun if it's the picture of someone.</small></h1>
+
+        <form id="form-upload" class="padded" role="form" action="/upload" method="post" enctype="multipart/form-data">
+          
+          <div class="row">
+            <div class="col-sm-12 col-md-5 center-block">
+              <div class="input-group">
+                <span class="input-group-btn">
+                  <span class="btn btn-primary btn-file">
+                    Browse&hellip; <input name="upload" id="upload" type="file">
+                  </span>
+                </span>
+                <input type="text" class="form-control" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-12 col-md-5 center-block">
+              <button type="submit" class="form-control btn btn-primary" id="submit" role="button">Upload</button>
+            </div>
+          </div>
+
+        </form>
+
+      </div>
+<!-- /Content -->
+
+    </div><!--/.container -->
+
+    <script src="/static/js/jquery-1.11.0.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      $(document).on('change', '.btn-file :file', function() {
+        var input = $(this),
+            numFiles = input.get(0).files ? input.get(0).files.length : 1,
+            label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+        input.trigger('fileselect', [numFiles, label]);
+      });
+
+      $(document).ready( function() {
+          $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+              
+              var input = $(this).parents('.input-group').find(':text'),
+                  log = numFiles > 1 ? numFiles + ' files selected' : label;
+              
+              if( input.length ) {
+                  input.val(log);
+              } else {
+                  if( log ) alert(log);
+              }
+              
+          });
+      });    
+    </script>
+
+
+  </body>
+</html>
+
