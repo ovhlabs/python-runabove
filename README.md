@@ -5,6 +5,9 @@ This is a Python SDK to use Instances and Object Storage on
 [RunAbove](https://www.runabove.com). The SDK uses the simple API provided by 
 RunAbove.
 
+[![Build 
+Status](https://travis-ci.org/runabove/python-runabove.svg?branch=master)](https://travis-ci.org/runabove/python-runabove)
+
 Quickstart
 ----------
 
