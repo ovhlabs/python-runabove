@@ -6,15 +6,23 @@ This is a Python SDK to use Instances and Object Storage on
 RunAbove.
 
 Quickstart
-------------------------------
+----------
 
-To start with the SDK, you have to download the code or clone the official 
-repository. Then, you can install the SDK with:
+The easiest way to start with the SDK is to install it from PyPi:
 
-    python setup.py install
+    pip install python-runabove
 
 RunAbove SDK can then be included in your Python programs. Some examples of
 applications using the SDK are available in the `examples` directory.
+
+Install from source
+-------------------
+
+To install the SDK from the Github sources you have to clone the repository.
+Then, you can install the SDK with:
+
+    python setup.py install
+
 
 Authenticate to RunAbove API
 ----------------------------
