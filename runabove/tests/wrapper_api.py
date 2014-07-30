@@ -95,7 +95,7 @@ class TestWrapperApi(unittest.TestCase):
             self.api.time_delta()
 
     def _request_credentials(self, redirection=None, status=200):
-        access_rules = [{'method': 'GET', 'path': '/storage'}],
+        access_rules = [{'method': 'GET', 'path': '/storage'}]
         response = {
             'validationUrl': 'https://api.runabove.com/login/qdfwb',
             'consumerKey': '63C4VMs4MDpwfGDj4KQEnTjbkvjSJCSY',
@@ -119,6 +119,14 @@ class TestWrapperApi(unittest.TestCase):
         self.assertEquals(
             httpretty.last_request().headers['X-Ra-Application'],
             self.application_key
+        )
+        self.assertEquals(
+            httpretty.last_request().parsed_body['redirection'],
+            redirection
+        )
+        self.assertEquals(
+            httpretty.last_request().parsed_body['accessRules'],
+            access_rules
         )
 
     def test_request_credentials_without_redirection(self):
@@ -188,6 +196,11 @@ class TestWrapperApi(unittest.TestCase):
             sig
         )
         self.assertEquals(result, response)
+        if content:
+            self.assertEquals(
+                httpretty.last_request().parsed_body,
+                content
+            )
 
     def test_raw_call_without_consumer_key(self):
         self.api.consumer_key = None

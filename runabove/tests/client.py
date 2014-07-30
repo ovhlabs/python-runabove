@@ -51,14 +51,37 @@ class TestRunabove(unittest.TestCase):
                                         consumer_key=self.consumer_key)
         self.client._api = self.mock_wrapper
 
-    def test_get_login_url(self):
+    def _get_login_url(self, access_rules=None, redirect_url=None):
         return_value = {"validationUrl": "runabove.com"}
+        if not access_rules:
+            access_rules = self.access_rules
         self.mock_wrapper.request_credentials.return_value = return_value
-        login_url = self.client.get_login_url()
+        login_url = self.client.get_login_url(access_rules, redirect_url)
         self.mock_wrapper.request_credentials.assert_called_once_with(
-            self.access_rules
+            access_rules,
+            redirect_url
         )
         self.assertEquals(login_url, return_value['validationUrl'])
+
+    def test_get_login_url(self):
+        self._get_login_url()
+
+    def test_get_login_url_with_access_rules(self):
+        access_rules = [
+            {'method': 'GET', 'path': '/me'}
+        ]
+        self._get_login_url(access_rules)
+
+    def test_get_login_url_with_redirect(self):
+        redirect_url = 'http://app.using.runabove.sdk.com/'
+        self._get_login_url(redirect_url=redirect_url)
+
+    def test_get_login_url_with_redirect_and_access_rules(self):
+        redirect_url = 'http://app.using.runabove.sdk.com/'
+        access_rules = [
+            {'method': 'GET', 'path': '/me'}
+        ]
+        self._get_login_url(access_rules, redirect_url)
 
     def test_get_consumer_key(self):
         self.mock_wrapper.consumer_key = self.consumer_key
