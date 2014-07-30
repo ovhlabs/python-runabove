@@ -1,0 +1,5 @@
+[run]
+source = runabove
+
+[report]
+omit = */tests/*
