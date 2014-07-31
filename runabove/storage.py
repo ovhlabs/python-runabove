@@ -265,9 +265,9 @@ class Container(Resource):
     @property
     def is_public(self):
         """Lazy loading of public state."""
-        if not self._is_public:
-            self._is_public = self._manager._handler.\
-                containers.get_by_name(self.region.name, self.name)._is_public
+        if self._is_public is None:
+            self._is_public = self._manager.\
+                get_by_name(self.region.name, self.name)._is_public
         return self._is_public
 
     def delete(self):
