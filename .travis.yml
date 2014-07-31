@@ -4,4 +4,8 @@ python:
 install:
   - "python setup.py install"
   - "pip install -r test-requirements.txt"
-script: python setup.py test
+  - "pip install coverage"
+  - "pip install coveralls"
+script: coverage run setup.py test
+after_success:
+  coveralls

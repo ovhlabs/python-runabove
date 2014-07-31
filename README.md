@@ -7,6 +7,8 @@ RunAbove.
 
 [![Build 
 Status](https://travis-ci.org/runabove/python-runabove.svg?branch=master)](https://travis-ci.org/runabove/python-runabove)
+[![Coverage 
+Status](https://coveralls.io/repos/runabove/python-runabove/badge.png?branch=master)](https://coveralls.io/r/runabove/python-runabove?branch=master)
 
 Quickstart
 ----------

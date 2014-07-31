@@ -64,7 +64,7 @@ class Runabove(object):
         self.account = AccountManager(self._api, self)
         self.containers = ContainerManager(self._api, self)
 
-    def get_login_url(self):
+    def get_login_url(self, access_rules=None, redirect_url=None):
         """Get the URL to identify and login a customer.
 
         RunAbove API uses a remote connection to avoid storing passwords inside
@@ -73,9 +73,14 @@ class Runabove(object):
         Then, the customer must login with his account using this URL and the
         consumer key will be validated by the API.
 
+        :param access_rules: List of access required by the application
+        :param redirect_url: URL where user will be redirected after signin
         :raises ApiException: Error send by api
         """
-        credentials = self._api.request_credentials(self.access_rules)
+        if isinstance(access_rules, list):
+            self.access_rules = access_rules
+        credentials = self._api.request_credentials(self.access_rules,
+                                                    redirect_url)
         return credentials['validationUrl']
 
     def get_consumer_key(self):

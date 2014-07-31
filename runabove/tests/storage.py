@@ -287,32 +287,93 @@ class TestContainerManager(unittest.TestCase):
 
 class TestContainer(unittest.TestCase):
 
+    container_name = 'MyTestContainer'
+
+    answer_list = '''[
+        [""],
+        [
+            {
+                "name": "obj1",
+                "bytes": 20,
+                "last_modified": "2014-07-30 11:30",
+                "content_type": "image/png"
+            },
+            {
+                "name": "obj2",
+                "bytes": 26,
+                "last_modified": "2014-07-30 11:31",
+                "content_type": "image/png"
+            }
+        ]
+    ]'''
+
+    @mock.patch('runabove.region.Region')
     @mock.patch('runabove.storage.ContainerManager')
-    def setUp(self, mock_containers):
+    def setUp(self, mock_containers, mock_region):
         self.mock_containers = mock_containers
+        self.mock_region = mock_region
         self.container = runabove.storage.Container(
             self.mock_containers,
-            'MyTestContainer',
+            self.container_name,
             1024,
             5,
-            'BHS-1'
+            self.mock_region
         )
+
+    def test_list_objects(self):
+        answer = json.loads(self.answer_list)
+        self.mock_containers._swift_call.return_value = answer
+        object_list = self.container.list_objects()
+        self.mock_containers._swift_call.assert_called_once_with(
+                self.mock_region.name,
+                'get_container',
+                self.container_name,
+                full_listing=True
+        )
+        self.assertIsInstance(object_list, list)
+        self.assertEquals(len(object_list), 2)
+        for obj in object_list:
+            self.assertIsInstance(obj, runabove.storage.ObjectStored)
 
     def test_delete(self):
         self.container.delete()
         self.mock_containers.delete.assert_called_once_with(
-            'BHS-1',
+            self.mock_region,
             self.container
         )
 
     def test_delete_object(self):
         self.container.delete_object('Test')
         self.mock_containers._swift_call.assert_called_once_with(
-            'BHS-1',
+            self.mock_region,
             'delete_object',
             self.container.name,
             'Test'
         )
+
+    def test_set_public(self):
+        self.container.set_public()
+        self.mock_containers.set_public.assert_called_once_with(
+            self.mock_region.name,
+            self.container
+        )
+
+    def test_set_private(self):
+        self.container.set_private()
+        self.mock_containers.set_private.assert_called_once_with(
+            self.mock_region.name,
+            self.container
+        )
+
+    def test_url(self):
+        base_url = 'https://url-of-endpoint'
+        self.mock_containers.get_region_url.return_value = base_url
+        url = self.container.url
+        self.mock_containers.get_region_url.assert_called_once_with(
+            self.mock_region.name
+        )
+        self.assertEquals(url, base_url + '/' + self.container_name)
+
 
 
 if __name__ == '__main__':
