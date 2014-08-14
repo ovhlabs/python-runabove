@@ -15,3 +15,10 @@ Walkthrough
 
 A Python script that shows how to list instances, containers, SSH keys and more
 as well as creating and deleting instances.
+
+Openstack
+---------
+
+A Python script instanciating a {nova|swift|neutron}client using a RunAbove
+token instead of the traditional user/password.
+
