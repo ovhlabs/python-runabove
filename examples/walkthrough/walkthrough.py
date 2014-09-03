@@ -34,6 +34,10 @@ import time
 from runabove import Runabove
 from runabove.exception import APIError
 
+# Python 3 renamed raw_input to input
+if not 'raw_input' in dir(__builtins__):
+    raw_input = input
+
 # You can enter your crendentials here if you have them,
 # otherwise leave it empty to learn how to get them.
 application_key = None
