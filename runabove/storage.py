@@ -30,7 +30,11 @@ from __future__ import absolute_import
 
 import functools
 import mimetypes
-import urllib
+
+try:
+    from urllib import quote as urllib_quote
+except ImportError:  # Python 3
+    from urllib.parse import quote as urllib_quote
 
 import swiftclient
 
@@ -387,7 +391,7 @@ class Container(Resource):
     def url(self):
         """Get the URL to access a container."""
         region_endpoint = self._manager.get_region_url(self.region.name)
-        container_name = urllib.quote(self.name).replace('/', '%2f')
+        container_name = urllib_quote(self.name).replace('/', '%2f')
         return '%s/%s' % (region_endpoint, container_name)
 
 
@@ -416,7 +420,7 @@ class ObjectStored(Resource):
     @property
     def url(self):
         """Get the URL of an object."""
-        object_name = urllib.quote(self.name)
+        object_name = urllib_quote(self.name)
         return '%s/%s' % (self.container.url, object_name)
 
     def delete(self):

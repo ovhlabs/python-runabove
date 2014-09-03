@@ -35,7 +35,11 @@ import requests
 import hashlib
 import time
 import json
-import urllib
+
+try:
+    from urllib import quote as urllib_quote
+except ImportError:  # Python 3
+    from urllib.parse import quote as urllib_quote
 
 from .exception import APIError, ResourceNotFoundError, BadParametersError, \
     ResourceAlreadyExistsError, NetworkError
@@ -176,7 +180,7 @@ class WrapperApi:
 
         :param string_to_encode: original string_to_encode
         """
-        return urllib.quote(string_to_encode).replace('/', '%2f')
+        return urllib_quote(string_to_encode).replace('/', '%2f')
 
     def get(self, path, content=None):
         """Helper method that wraps a GET call to raw_call.
