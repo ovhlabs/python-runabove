@@ -29,6 +29,7 @@
 This module provides a simple python wrapper over the RunAbove API
 It handles requesting credential, signing queries...
 """
+from __future__ import absolute_import
 
 import requests
 import hashlib

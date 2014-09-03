@@ -26,15 +26,16 @@
 # written authorization from OVH.
 
 """RunAbove SDK interface for users."""
+from __future__ import absolute_import
 
-from wrapper_api import WrapperApi
-from flavor import FlavorManager
-from region import RegionManager
-from ssh_key import SSHKeyManager
-from image import ImageManager
-from instance import InstanceManager
-from storage import ContainerManager
-from account import AccountManager
+from .wrapper_api import WrapperApi
+from .flavor import FlavorManager
+from .region import RegionManager
+from .ssh_key import SSHKeyManager
+from .image import ImageManager
+from .instance import InstanceManager
+from .storage import ContainerManager
+from .account import AccountManager
 
 
 class Runabove(object):

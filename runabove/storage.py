@@ -26,6 +26,7 @@
 # written authorization from OVH.
 
 """RunAbove Object Storage service library."""
+from __future__ import absolute_import
 
 import functools
 import mimetypes
@@ -33,7 +34,7 @@ import urllib
 
 import swiftclient
 
-from base import Resource, BaseManagerWithList
+from .base import Resource, BaseManagerWithList
 from .exception import APIError, ResourceNotFoundError
 
 

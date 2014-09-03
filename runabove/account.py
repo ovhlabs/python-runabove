@@ -26,8 +26,9 @@
 # written authorization from OVH.
 
 """RunAbove account service library."""
+from __future__ import absolute_import
 
-from base import Resource, BaseManager
+from .base import Resource, BaseManager
 from .exception import ResourceNotFoundError
 
 

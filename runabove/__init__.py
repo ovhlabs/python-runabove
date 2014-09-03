@@ -26,8 +26,10 @@
 # written authorization from OVH.
 
 """RunAbove bindings."""
+from __future__ import absolute_import
+
 import pkg_resources
 
-from client import Runabove
+from .client import Runabove
 
 __version__ = pkg_resources.get_distribution("python-runabove").version
