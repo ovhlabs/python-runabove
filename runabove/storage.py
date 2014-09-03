@@ -115,7 +115,7 @@ class ContainerManager(BaseManagerWithList):
             call = getattr(swift, action.lower())
             try:
                 return call(*args, **kwargs)
-            except swiftclient.exceptions.ClientException, e:
+            except swiftclient.exceptions.ClientException as e:
                 if e.http_status == 401:
                     # Token is invalid, regenerate swift clients
                     self._swifts = None

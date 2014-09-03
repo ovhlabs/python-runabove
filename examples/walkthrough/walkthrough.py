@@ -146,7 +146,7 @@ else:
             try:
                 run.ssh_keys.create(region, ssh_key_name, ssh_key_content)
                 print 'Key added to %s' % region.name
-            except APIError, e:
+            except APIError as e:
                 print 'Couldn\'t add the SSH key to RunAbove. %s' % e
 
 # Ask the user to create an instance if he has a key
