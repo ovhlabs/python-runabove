@@ -30,6 +30,11 @@ import json
 import mock
 import runabove
 
+from sys import version_info
+
+if version_info[0] >= 3:
+    unicode = str  # Python 3 str replaces unicode
+
 class TestContainerManager(unittest.TestCase):
     """Test storage using RunAbove API.
 
