@@ -135,7 +135,7 @@ class WrapperApi:
                 target_url,
                 body,
                 now
-            ]))
+            ]).encode())
         sig = "$1$" + s1.hexdigest()
         query_headers = {
             "X-Ra-Application": self.application_key,

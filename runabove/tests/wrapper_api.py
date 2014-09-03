@@ -168,7 +168,7 @@ class TestWrapperApi(unittest.TestCase):
                 self.base_url + path,
                 body,
                 '1404395889'
-            ]))
+            ]).encode())
         sig = "$1$" + s1.hexdigest()
         result = self.api.raw_call(method, path, content)
         self.assertEquals(
