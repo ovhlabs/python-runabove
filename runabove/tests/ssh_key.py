@@ -66,7 +66,7 @@ class TestSshKey(unittest.TestCase):
                                                        mock_client)
 
     def test_base_path(self):
-        self.assertEquals(self.ssh_keys.basepath, '/ssh')
+        self.assertEqual(self.ssh_keys.basepath, '/ssh')
 
     def test_list(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_list)
@@ -89,7 +89,7 @@ class TestSshKey(unittest.TestCase):
         self.assertTrue(len(ssh_key_list) > 0)
         for ssh_key in ssh_key_list:
             self.assertIsInstance(ssh_key, runabove.ssh_key.SSHKey)
-            self.assertEquals(ssh_key.region.name, region_name)
+            self.assertEqual(ssh_key.region.name, region_name)
 
     def test_get_by_name(self):
         region_name = 'BHS-1'
@@ -101,7 +101,7 @@ class TestSshKey(unittest.TestCase):
             self.ssh_keys.basepath + '/' + name,
             {'region': region_name}
         )
-        self.assertEquals(ssh_key.name, name)
+        self.assertEqual(ssh_key.name, name)
 
     def test_create_ssh_key(self):
         region_name = 'BHS-1'

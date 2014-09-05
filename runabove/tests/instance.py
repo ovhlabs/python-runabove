@@ -142,7 +142,7 @@ class TestInstance(unittest.TestCase):
                                                            mock_client)
 
     def test_base_path(self):
-        self.assertEquals(self.instances.basepath, '/instance')
+        self.assertEqual(self.instances.basepath, '/instance')
 
     def test_list(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_list)
@@ -256,7 +256,7 @@ class TestInstance(unittest.TestCase):
         self.mock_wrapper.get.assert_called_once_with(
             self.instances.basepath + '/' + self.instance_id + '/vnc'
         )
-        self.assertEquals(vnc, url)
+        self.assertEqual(vnc, url)
 
 class TestInstanceObject(unittest.TestCase):
 
@@ -311,7 +311,7 @@ class TestInstanceObject(unittest.TestCase):
 
     def test_get_ssh_key_empty(self):
         self.instance._ssh_key_name = None
-        self.assertEquals(self.instance.ssh_key, None)
+        self.assertEqual(self.instance.ssh_key, None)
 
     def test_get_ips(self):
         self.instance.ips

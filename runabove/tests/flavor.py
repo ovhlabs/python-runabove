@@ -59,7 +59,7 @@ class TestFlavor(unittest.TestCase):
         self.flavors = runabove.flavor.FlavorManager(mock_wrapper, mock_client)
 
     def test_base_path(self):
-        self.assertEquals(self.flavors.basepath, '/flavor')
+        self.assertEqual(self.flavors.basepath, '/flavor')
 
     def test_list(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_list)

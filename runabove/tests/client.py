@@ -61,7 +61,7 @@ class TestRunabove(unittest.TestCase):
             access_rules,
             redirect_url
         )
-        self.assertEquals(login_url, return_value['validationUrl'])
+        self.assertEqual(login_url, return_value['validationUrl'])
 
     def test_get_login_url(self):
         self._get_login_url()
@@ -85,7 +85,7 @@ class TestRunabove(unittest.TestCase):
 
     def test_get_consumer_key(self):
         self.mock_wrapper.consumer_key = self.consumer_key
-        self.assertEquals(self.client.get_consumer_key(),
+        self.assertEqual(self.client.get_consumer_key(),
                           self.consumer_key)
 
     def test_existance_of_flavors_manager(self):

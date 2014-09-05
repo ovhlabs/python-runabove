@@ -136,14 +136,14 @@ class TestContainerManager(unittest.TestCase):
                                                             mock_client)
 
     def test_base_path(self):
-        self.assertEquals(self.containers.basepath, '/storage')
+        self.assertEqual(self.containers.basepath, '/storage')
 
     def test_list(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_list)
         container_list = self.containers.list()
         self.mock_wrapper.get.assert_called_once_with(self.containers.basepath)
         self.assertIsInstance(container_list, list)
-        self.assertEquals(len(container_list), 2)
+        self.assertEqual(len(container_list), 2)
         for container in container_list:
             self.assertIsInstance(container, runabove.storage.Container)
 
@@ -155,11 +155,11 @@ class TestContainerManager(unittest.TestCase):
             {'region': self.region}
         )
         self.assertIsInstance(container_list, list)
-        self.assertEquals(len(container_list), 2)
+        self.assertEqual(len(container_list), 2)
         for container in container_list:
             self.assertIsInstance(container, runabove.storage.Container)
             self.assertIsInstance(container.region, runabove.region.Region)
-            self.assertEquals(container.region.name, self.region)
+            self.assertEqual(container.region.name, self.region)
 
     def test_get_by_name(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_one)
@@ -170,14 +170,14 @@ class TestContainerManager(unittest.TestCase):
             {'region': self.region}
         )
         self.assertIsInstance(container, runabove.storage.Container)
-        self.assertEquals(container.name, self.name)
+        self.assertEqual(container.name, self.name)
 
     def test_get_endpoint(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_token)
         result = self.containers._get_endpoints()
         self.mock_wrapper.get.assert_called_once_with('/token')
         self.assertIsInstance(result, tuple)
-        self.assertEquals(len(result), 2)
+        self.assertEqual(len(result), 2)
         for endpoint in result[0]:
             self.assertIsInstance(endpoint, dict)
             self.assertIsInstance(endpoint['url'], unicode)
@@ -281,7 +281,7 @@ class TestContainerManager(unittest.TestCase):
         }
         self.containers._swifts = swifts
         url = self.containers.get_region_url('BHS-1')
-        self.assertEquals(url, 'http://endpoint')
+        self.assertEqual(url, 'http://endpoint')
 
     def test_get_region_url_not_found(self):
         self.containers._swifts = {}
@@ -398,7 +398,7 @@ class TestContainer(unittest.TestCase):
             full_listing=True
         )
         self.assertIsInstance(object_list, list)
-        self.assertEquals(len(object_list), 2)
+        self.assertEqual(len(object_list), 2)
         for obj in object_list:
             self.assertIsInstance(obj, runabove.storage.ObjectStored)
 
@@ -418,9 +418,9 @@ class TestContainer(unittest.TestCase):
         )
         self.assertIsInstance(obj, runabove.storage.ObjectStored)
         if download:
-            self.assertEquals(obj._data, 'data')
+            self.assertEqual(obj._data, 'data')
         else:
-            self.assertEquals(obj._data, None)
+            self.assertEqual(obj._data, None)
 
     def test_get_object_by_name_without_download(self):
         self._get_object_by_name()
@@ -499,7 +499,7 @@ class TestContainer(unittest.TestCase):
         self.mock_containers.get_region_url.assert_called_once_with(
             self.mock_region.name
         )
-        self.assertEquals(url, base_url + '/' + self.container_name)
+        self.assertEqual(url, base_url + '/' + self.container_name)
 
 
 class TestObjectStored(unittest.TestCase):
@@ -527,7 +527,7 @@ class TestObjectStored(unittest.TestCase):
             self.obj.name,
             download=True
         )
-        self.assertEquals(data, fake_data)
+        self.assertEqual(data, fake_data)
 
     @mock.patch('runabove.storage.ObjectStored')
     def test_data_already_downloaded(self, mock_obj):
@@ -535,13 +535,13 @@ class TestObjectStored(unittest.TestCase):
         self.obj._data = fake_data
         data = self.obj.data
         self.mock_container.get_object_by_name.assert_not_called()
-        self.assertEquals(data, fake_data)
+        self.assertEqual(data, fake_data)
 
     def test_url(self):
         base_url = 'https://url-of-endpoint/containerName'
         self.mock_container.url = base_url
         url = self.obj.url
-        self.assertEquals(url, base_url + '/' + self.obj_name)
+        self.assertEqual(url, base_url + '/' + self.obj_name)
 
     def test_delete(self):
         self.obj.delete()
