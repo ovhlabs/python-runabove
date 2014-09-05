@@ -26,13 +26,17 @@
 # promote the sale, use or other dealings in this Software without prior
 # written authorization from OVH.
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 from os import path
 import sys
 import time
 
 from runabove import Runabove
 from runabove.exception import APIError
+
+# Python 3 renamed raw_input to input
+if not 'raw_input' in dir(__builtins__):
+    raw_input = input
 
 # You can enter your crendentials here if you have them,
 # otherwise leave it empty to learn how to get them.
@@ -58,9 +62,9 @@ def file_get_contents(filename):
 
 def pick_in_list(list_name, obj_list):
     """Generic function to ask the user to choose from a list."""
-    print '\n%ss available' % list_name
+    print('\n%ss available' % list_name)
     for num, i in enumerate(obj_list):
-        print '\t%d) %s' % (num+1, i.name)
+        print('\t%d) %s' % (num+1, i.name))
     try:
         selected_num = raw_input('\nPlease select a %s number [1]: ' %
                                  list_name.lower())
@@ -68,19 +72,19 @@ def pick_in_list(list_name, obj_list):
         selected = obj_list[selected_num]
     except (ValueError, IndexError):
         selected = obj_list[0]
-    print 'Using %s %s.' % (list_name.lower(), selected.name)
+    print('Using %s %s.' % (list_name.lower(), selected.name))
     return selected
 
 # Check if the user has application credentials
 if not application_key or not application_secret:
-    print '\nTo use RunAbove SDK you need to register an application'
+    print('\nTo use RunAbove SDK you need to register an application')
     choice = raw_input('Would you like to register one? (y/N): ')
     if choice.lower() != 'y':
-        print 'Not creating an application, aborting'
+        print('Not creating an application, aborting')
         sys.exit(0)
     else:
-        print '\nYou can do it here https://api.runabove.com/createApp'
-        print 'When you are done enter here your Application Key and Secret'
+        print('\nYou can do it here https://api.runabove.com/createApp')
+        print('When you are done enter here your Application Key and Secret')
         application_key = raw_input('\nApplication Key: ')
         application_secret = raw_input('Application Secret: ')
 
@@ -91,36 +95,36 @@ run = Runabove(application_key,
 
 # Check if the user has a Consumer Key
 if not run.get_consumer_key():
-    print '\nEach user using your application needs a Consumer Key.'
+    print('\nEach user using your application needs a Consumer Key.')
     choice = raw_input('\nWould you like to get one? (y/N): ')
     if choice.lower() != 'y':
-        print 'Not requesting a Consumer Key, aborting'
+        print('Not requesting a Consumer Key, aborting')
         sys.exit(0)
     else:
-        print '\nYou can get it here %s' % run.get_login_url()
+        print('\nYou can get it here %s' % run.get_login_url())
         raw_input('\nWhen you are logged, press Enter ')
-        print 'Your consumer key is: %s' % run.get_consumer_key()
+        print('Your consumer key is: %s' % run.get_consumer_key())
 
 # Get information about the account
 acc = run.account.get()
-print '\nHi %s,' % acc.first_name
+print('\nHi %s,' % acc.first_name)
 
 # Get the list of running instances
 instances = run.instances.list()
-print '\nYou have %d instance(s) running' % len(instances)
+print('\nYou have %d instance(s) running' % len(instances))
 for i in instances:
-    print '\t- [%s] %s (%s, %s)' % (i.region.name, i.name, i.ip, i.image.name)
+    print('\t- [%s] %s (%s, %s)' % (i.region.name, i.name, i.ip, i.image.name))
 
 # Get the list of containers
 containers = run.containers.list()
-print '\nYou have %d container(s)' % len(containers)
+print('\nYou have %d container(s)' % len(containers))
 for c in containers:
     if c.is_public:
-        print '\t- [%s] %s (public, %s)' % (c.region.name, c.name,
-                                            sizeof_fmt(c.size))
+        print('\t- [%s] %s (public, %s)' % (c.region.name, c.name,
+                                            sizeof_fmt(c.size)))
     else:
-        print '\t- [%s] %s (private, %s)' % (c.region.name, c.name,
-                                             sizeof_fmt(c.size))
+        print('\t- [%s] %s (private, %s)' % (c.region.name, c.name,
+                                             sizeof_fmt(c.size)))
 
 # Ask the user to select one region
 region = pick_in_list('Region', run.regions.list())
@@ -128,26 +132,26 @@ region = pick_in_list('Region', run.regions.list())
 # Get the list of SSH keys in the selected region
 ssh_keys = run.ssh_keys.list_by_region(region)
 if ssh_keys:
-    print '\nYou have %d SSH key(s) in %s' % (len(ssh_keys), region.name)
+    print('\nYou have %d SSH key(s) in %s' % (len(ssh_keys), region.name))
     for s in ssh_keys:
-        print '\t- [%s] %s (%s)' % (s.region.name, s.name, s.finger_print)
+        print('\t- [%s] %s (%s)' % (s.region.name, s.name, s.finger_print))
 else:
-    print '\nYou have no SSH key in %s' % region.name
+    print('\nYou have no SSH key in %s' % region.name)
     # Ask the user to create an SSH key
     choice = raw_input('\nWould you like to add one? (y/N): '
                        % region.name)
     if choice.lower() == 'y':
         ssh_key_path = path.expanduser('~/.ssh/id_rsa.pub')
         if not path.isfile(ssh_key_path):
-            print 'You don\'t have a key in ~/.ssh/id_rsa.pub, aborting.'
+            print('You don\'t have a key in ~/.ssh/id_rsa.pub, aborting.')
         else:
             ssh_key_name = raw_input('Name of the SSH key: ')
             ssh_key_content = file_get_contents(ssh_key_path)
             try:
                 run.ssh_keys.create(region, ssh_key_name, ssh_key_content)
-                print 'Key added to %s' % region.name
-            except APIError, e:
-                print 'Couldn\'t add the SSH key to RunAbove. %s' % e
+                print('Key added to %s' % region.name)
+            except APIError as e:
+                print('Couldn\'t add the SSH key to RunAbove. %s' % e)
 
 # Ask the user to create an instance if he has a key
 if run.ssh_keys.list_by_region(region):
@@ -160,18 +164,18 @@ if run.ssh_keys.list_by_region(region):
         instance_name = raw_input('\nName of the instance: ')
         instance = run.instances.create(region, instance_name,
                                         flavor, image, ssh_key)
-        print '\nInstance created'
-        print 'Waiting for instance to be ready...'
+        print('\nInstance created')
+        print('Waiting for instance to be ready...')
 
         while not instance.status == 'ACTIVE':
             time.sleep(10)
             instance = run.instances.get_by_id(instance.id)
 
-        print 'Instance launched'
-        print '\t-  IP: %s' % instance.ip
-        print '\t- VNC: %s' % instance.vnc
-        print '\t- SSH: ssh admin@%s' % instance.ip
+        print('Instance launched')
+        print('\t-  IP: %s' % instance.ip)
+        print('\t- VNC: %s' % instance.vnc)
+        print('\t- SSH: ssh admin@%s' % instance.ip)
         choice = raw_input('\nWould you like to delete the instance? (y/N): ')
         if choice.lower() == 'y':
             instance.delete()
-            print 'Instance deleted'
+            print('Instance deleted')

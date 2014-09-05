@@ -64,12 +64,12 @@ class TestWrapperApi(unittest.TestCase):
         self.time_patch.stop()
 
     def test_constructor(self):
-        self.assertEquals(self.api.application_key, self.application_key)
-        self.assertEquals(self.api.consumer_key, self.consumer_key)
-        self.assertEquals(self.api.application_secret, self.application_secret)
+        self.assertEqual(self.api.application_key, self.application_key)
+        self.assertEqual(self.api.consumer_key, self.consumer_key)
+        self.assertEqual(self.api.application_secret, self.application_secret)
 
     def test_base_url(self):
-        self.assertEquals(self.api.base_url, self.base_url)
+        self.assertEqual(self.api.base_url, self.base_url)
 
     def test_time_delta(self):
         self.api._time_delta = None
@@ -80,8 +80,8 @@ class TestWrapperApi(unittest.TestCase):
             body=fake_server_time
         )
         time_delta = self.api.time_delta()
-        self.assertEquals(time_delta, 6)
-        self.assertEquals(self.api._time_delta, 6)
+        self.assertEqual(time_delta, 6)
+        self.assertEqual(self.api._time_delta, 6)
 
     def test_time_delta_with_bad_answer(self):
         self.api._time_delta = None
@@ -111,20 +111,20 @@ class TestWrapperApi(unittest.TestCase):
             body=json.dumps(response)
         )
         res = self.api.request_credentials(access_rules, redirection)
-        self.assertEquals(self.api.consumer_key, response['consumerKey'])
-        self.assertEquals(
+        self.assertEqual(self.api.consumer_key, response['consumerKey'])
+        self.assertEqual(
             httpretty.last_request().headers['content-type'],
             'application/json'
         )
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().headers['X-Ra-Application'],
             self.application_key
         )
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().parsed_body['redirection'],
             redirection
         )
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().parsed_body['accessRules'],
             access_rules
         )
@@ -168,36 +168,36 @@ class TestWrapperApi(unittest.TestCase):
                 self.base_url + path,
                 body,
                 '1404395889'
-            ]))
+            ]).encode())
         sig = "$1$" + s1.hexdigest()
         result = self.api.raw_call(method, path, content)
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().method,
             method.upper()
         )
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().headers['content-type'],
             'application/json'
         )
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().headers['X-Ra-Application'],
             self.application_key
         )
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().headers['X-Ra-Consumer'],
             self.consumer_key
         )
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().headers['X-Ra-Timestamp'],
             '1404395889'
         )
-        self.assertEquals(
+        self.assertEqual(
             httpretty.last_request().headers['X-Ra-Signature'],
             sig
         )
-        self.assertEquals(result, response)
+        self.assertEqual(result, response)
         if content:
-            self.assertEquals(
+            self.assertEqual(
                 httpretty.last_request().parsed_body,
                 content
             )
@@ -302,13 +302,13 @@ class TestWrapperApi(unittest.TestCase):
     def test_encode_for_api_without_modification(self):
         string = 'StringThatDoesNotNeedModification'
         result = self.api.encode_for_api(string)
-        self.assertEquals(result, string)
+        self.assertEqual(result, string)
 
     def test_encode_for_api_with_modification(self):
         string = 'String/That/Needs/Modification'
         expected = 'String%2fThat%2fNeeds%2fModification'
         result = self.api.encode_for_api(string)
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
 if __name__ == '__main__':
     unittest.main()

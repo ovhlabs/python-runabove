@@ -26,14 +26,19 @@
 # written authorization from OVH.
 
 """RunAbove Object Storage service library."""
+from __future__ import absolute_import
 
 import functools
 import mimetypes
-import urllib
+
+try:
+    from urllib import quote as urllib_quote
+except ImportError:  # Python 3
+    from urllib.parse import quote as urllib_quote
 
 import swiftclient
 
-from base import Resource, BaseManagerWithList
+from .base import Resource, BaseManagerWithList
 from .exception import APIError, ResourceNotFoundError
 
 
@@ -115,7 +120,7 @@ class ContainerManager(BaseManagerWithList):
             call = getattr(swift, action.lower())
             try:
                 return call(*args, **kwargs)
-            except swiftclient.exceptions.ClientException, e:
+            except swiftclient.exceptions.ClientException as e:
                 if e.http_status == 401:
                     # Token is invalid, regenerate swift clients
                     self._swifts = None
@@ -386,7 +391,7 @@ class Container(Resource):
     def url(self):
         """Get the URL to access a container."""
         region_endpoint = self._manager.get_region_url(self.region.name)
-        container_name = urllib.quote(self.name).replace('/', '%2f')
+        container_name = urllib_quote(self.name).replace('/', '%2f')
         return '%s/%s' % (region_endpoint, container_name)
 
 
@@ -415,7 +420,7 @@ class ObjectStored(Resource):
     @property
     def url(self):
         """Get the URL of an object."""
-        object_name = urllib.quote(self.name)
+        object_name = urllib_quote(self.name)
         return '%s/%s' % (self.container.url, object_name)
 
     def delete(self):

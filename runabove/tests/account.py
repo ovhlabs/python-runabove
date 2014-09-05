@@ -66,7 +66,7 @@ class TestAccount(unittest.TestCase):
         self.account = runabove.account.AccountManager(mock_wrapper, None)
 
     def test_base_path(self):
-        self.assertEquals(self.account.basepath, '/me')
+        self.assertEqual(self.account.basepath, '/me')
 
     def test_account_existance(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_account)
@@ -78,8 +78,8 @@ class TestAccount(unittest.TestCase):
         balance = self.account._load_balance()
         self.assertIsInstance(balance, tuple)
         self.assertTrue(len(balance) == 2)
-        self.assertEquals(balance[0], 193.39)
-        self.assertEquals(balance[1], 200)
+        self.assertEqual(balance[0], 193.39)
+        self.assertEqual(balance[1], 200)
 
 
 class TestAccountObject(unittest.TestCase):
@@ -103,12 +103,12 @@ class TestAccountObject(unittest.TestCase):
 
     def test_current_total(self):
         self.mock_accounts._load_balance.return_value = (193.39, 200)
-        self.assertEquals(self.account.current_total, 193.39)
+        self.assertEqual(self.account.current_total, 193.39)
         self.mock_accounts._load_balance.assert_called_once()
 
     def test_credit_left(self):
         self.mock_accounts._load_balance.return_value = (193.39, 200)
-        self.assertEquals(self.account.credit_left, 200)
+        self.assertEqual(self.account.credit_left, 200)
         self.mock_accounts._load_balance.assert_called_once()
 
 if __name__ == '__main__':

@@ -66,14 +66,14 @@ class TestImage(unittest.TestCase):
         self.images = runabove.image.ImageManager(mock_wrapper, mock_client)
 
     def test_base_path(self):
-        self.assertEquals(self.images.basepath, '/image')
+        self.assertEqual(self.images.basepath, '/image')
 
     def test_list(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_list)
         image_list = self.images.list()
         self.mock_wrapper.get.assert_called_once_with(self.images.basepath)
         self.assertIsInstance(image_list, list)
-        self.assertEquals(len(image_list), 2)
+        self.assertEqual(len(image_list), 2)
         for image in image_list:
             self.assertIsInstance(image, runabove.image.Image)
 
@@ -86,10 +86,10 @@ class TestImage(unittest.TestCase):
             {'region': region_name}
         )
         self.assertIsInstance(image_list, list)
-        self.assertEquals(len(image_list), 2)
+        self.assertEqual(len(image_list), 2)
         for image in image_list:
             self.assertIsInstance(image, runabove.image.Image)
-            self.assertEquals(image.region.name, 'BHS-1')
+            self.assertEqual(image.region.name, 'BHS-1')
 
     def test_find_by_image_id(self):
         the_id = "Pfdq813FxcFel78954aFEfcpaW21"
@@ -100,7 +100,7 @@ class TestImage(unittest.TestCase):
                 self.images._api.encode_for_api(the_id)
         )
         self.assertIsInstance(image, runabove.image.Image)
-        self.assertEquals(image.id, the_id)
+        self.assertEqual(image.id, the_id)
 
 if __name__ == '__main__':
     unittest.main()

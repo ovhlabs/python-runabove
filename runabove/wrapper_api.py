@@ -29,12 +29,17 @@
 This module provides a simple python wrapper over the RunAbove API
 It handles requesting credential, signing queries...
 """
+from __future__ import absolute_import
 
 import requests
 import hashlib
 import time
 import json
-import urllib
+
+try:
+    from urllib import quote as urllib_quote
+except ImportError:  # Python 3
+    from urllib.parse import quote as urllib_quote
 
 from .exception import APIError, ResourceNotFoundError, BadParametersError, \
     ResourceAlreadyExistsError, NetworkError
@@ -134,7 +139,7 @@ class WrapperApi:
                 target_url,
                 body,
                 now
-            ]))
+            ]).encode())
         sig = "$1$" + s1.hexdigest()
         query_headers = {
             "X-Ra-Application": self.application_key,
@@ -175,7 +180,7 @@ class WrapperApi:
 
         :param string_to_encode: original string_to_encode
         """
-        return urllib.quote(string_to_encode).replace('/', '%2f')
+        return urllib_quote(string_to_encode).replace('/', '%2f')
 
     def get(self, path, content=None):
         """Helper method that wraps a GET call to raw_call.

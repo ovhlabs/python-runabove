@@ -26,8 +26,9 @@
 # written authorization from OVH.
 
 """RunAbove SSH key service library."""
+from __future__ import absolute_import
 
-from base import Resource, BaseManagerWithList
+from .base import Resource, BaseManagerWithList
 
 
 class SSHKeyManager(BaseManagerWithList):

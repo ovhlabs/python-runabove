@@ -41,7 +41,7 @@ class TestRegion(unittest.TestCase):
         self.regions = runabove.region.RegionManager(mock_wrapper, mock_client)
 
     def test_base_path(self):
-        self.assertEquals(self.regions.basepath, '/region')
+        self.assertEqual(self.regions.basepath, '/region')
 
     def test_list(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_list)
@@ -58,7 +58,7 @@ class TestRegion(unittest.TestCase):
         region = self.regions.get_by_name(region_name)
         self.mock_wrapper.get.assert_called_once_with(self.regions.basepath)
         self.assertIsInstance(region, runabove.region.Region)
-        self.assertEquals(region.name, region_name)
+        self.assertEqual(region.name, region_name)
 
     def test_get_by_name_404(self):
         with self.assertRaises(runabove.exception.ResourceNotFoundError):
