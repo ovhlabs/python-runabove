@@ -30,7 +30,7 @@ import setuptools
 
 setuptools.setup(
     name='python-runabove',
-    version='1.1.0',
+    version='1.2.0',
     author='RunAbove',
     author_email='dev@runabove.com',
     url='https://www.runabove.com/',

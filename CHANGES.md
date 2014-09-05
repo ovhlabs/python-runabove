@@ -1,6 +1,12 @@
 Changelog of Python SDK for RunAbove API
 ========================================
 
+Release 1.2.0 (2014-09-05)
+--------------------------
+
+* Support Python 3.4 (@cybojenix)
+
+
 Release 1.1.0 (2014-07-30)
 --------------------------
 
