@@ -80,6 +80,17 @@ class TestFlavor(unittest.TestCase):
         for flavor in flavor_list:
             self.assertIsInstance(flavor, runabove.flavor.Flavor)
 
+    def test_get_by_name(self):
+        self.mock_wrapper.get.return_value = json.loads(self.answer_list)
+        f = self.flavors.get_by_name('pci2.d.r1')
+        self.assertEquals(1, len(f))
+        self.assertIsInstance(f[0], runabove.flavor.Flavor)
+
+    def test_get_by_name_404(self):
+        self.mock_wrapper.get.return_value = json.loads(self.answer_list)
+        f = self.flavors.get_by_name('non-existent-flavor')
+        self.assertEquals([], f)
+
     def test_get_by_id(self):
         self.mock_wrapper.get.return_value = json.loads(self.answer_list)
         f = self.flavors.get_by_id('ab35df0e-4632-48b2-b6a5-c1f1d922bd43')

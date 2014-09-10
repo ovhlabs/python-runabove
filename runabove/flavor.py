@@ -48,6 +48,17 @@ class FlavorManager(BaseManagerWithList):
                       flavor.get('vcpus'),
                       region)
 
+    def get_by_name(self, flavor_name):
+        """Get a list of flavors named ``flavor_name``
+
+        :param flavor_name: name of the flavors to retrieve
+        """
+        flavors = []
+        for flavor in self.list():
+            if flavor.name == flavor_name:
+                flavors.append(flavor)
+        return flavors
+
     def get_by_id(self, flavor_id):
         """Get a flavor by its id.
 

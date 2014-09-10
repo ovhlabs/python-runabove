@@ -91,6 +91,17 @@ class TestImage(unittest.TestCase):
             self.assertIsInstance(image, runabove.image.Image)
             self.assertEqual(image.region.name, 'BHS-1')
 
+    def test_get_by_name(self):
+        self.mock_wrapper.get.return_value = json.loads(self.answer_list)
+        f = self.images.get_by_name('Fedora 20')
+        self.assertEquals(1, len(f))
+        self.assertIsInstance(f[0], runabove.image.Image)
+
+    def test_get_by_name_404(self):
+        self.mock_wrapper.get.return_value = json.loads(self.answer_list)
+        f = self.images.get_by_name('non-existent-image')
+        self.assertEquals([], f)
+
     def test_find_by_image_id(self):
         the_id = "Pfdq813FxcFel78954aFEfcpaW21"
         self.mock_wrapper.get.return_value = json.loads(self.answer_one)

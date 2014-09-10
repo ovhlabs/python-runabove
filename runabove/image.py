@@ -45,6 +45,17 @@ class ImageManager(BaseManagerWithList):
         image = self._api.get(url)
         return self._dict_to_obj(image)
 
+    def get_by_name(self, image_name):
+        """Get a list of images named ``image_name``
+
+        :param image_name: name of the images to retrieve
+        """
+        images = []
+        for image in self.list():
+            if image.name == image_name:
+                images.append(image)
+        return images
+
     def _dict_to_obj(self, key):
         """Converts a dict to an image object."""
         region = self._handler.regions._name_to_obj(key['region'])
