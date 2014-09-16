@@ -46,7 +46,10 @@ class ContainerManager(BaseManagerWithList):
     """Manage containers available in RunAbove."""
 
     basepath = '/storage'
-    _swifts = {}
+
+    def __init__(self, *args, **kwargs):
+        super(ContainerManager, self).__init__(*args, **kwargs)
+        self.swifts = {}
 
     def get_by_name(self, region, container_name):
         """Get a container by its name.
@@ -84,29 +87,16 @@ class ContainerManager(BaseManagerWithList):
                          region,
                          public=container.get('public'))
 
-    def _get_endpoints(self):
-        """Get the OpenStack endpoint for storage in each region."""
-        tokens = self._api.get('/token')
-        catalog = tokens['token']['catalog']
-        for service in catalog:
-            if service['type'] != 'object-store':
-                continue
-            return service['endpoints'], tokens['X-Auth-Token']
-
-        raise ResourceNotFoundError(msg='No Object Storage endpoint')
-
-    def _get_swift_clients(self):
-        """Get the swift client for each region."""
-        endpoints, token = self._get_endpoints()
-        swifts = {}
-        for endpoint in endpoints:
-            s = swiftclient.client.Connection(preauthurl=endpoint['url'],
-                                              preauthtoken=token)
-            swifts[endpoint['region']] = {
-                    'client': s,
-                    'endpoint': endpoint['url']
-            }
-        return swifts
+    def _get_swift_client(self, region_name):
+        """Get the swift client for a region."""
+        token = self._handler.token.get()
+        endpoint = token.get_endpoint('object-store', region_name)
+        client = swiftclient.client.Connection(preauthurl=endpoint['url'],
+                                               preauthtoken=token.auth_token)
+        return {
+            'client': client,
+            'endpoint': endpoint['url'],
+        }
 
     def _swift_call(self, region, action, *args, **kwargs):
         """Wrap calls to swiftclient to allow retry."""
@@ -116,6 +106,9 @@ class ContainerManager(BaseManagerWithList):
             region_name = region
         retries = 0
         while retries < 3:
+            if region_name not in self.swifts:
+                self.swifts[region_name] = self._get_swift_client(region_name)
+
             swift = self.swifts[region_name]['client']
             call = getattr(swift, action.lower())
             try:
@@ -123,7 +116,7 @@ class ContainerManager(BaseManagerWithList):
             except swiftclient.exceptions.ClientException as e:
                 if e.http_status == 401:
                     # Token is invalid, regenerate swift clients
-                    self._swifts = None
+                    del self.swifts[region_name]
                 if e.http_status == 404:
                     raise ResourceNotFoundError(msg=e.msg)
                 else:
@@ -248,12 +241,6 @@ class ContainerManager(BaseManagerWithList):
                          content_length=0,
                          content_type=content_type)
 
-    @property
-    def swifts(self):
-        """Lazy load of one swift client per region."""
-        if not self._swifts:
-            self._swifts = self._get_swift_clients()
-        return self._swifts
 
 class Container(Resource):
     """Represents one container."""
