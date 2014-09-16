@@ -65,7 +65,7 @@ class Runabove(object):
         self.instances = InstanceManager(self._api, self)
         self.account = AccountManager(self._api, self)
         self.containers = ContainerManager(self._api, self)
-        self.token = TokenManager(self._api, self)
+        self.tokens = TokenManager(self._api, self)
 
     def get_login_url(self, access_rules=None, redirect_url=None):
         """Get the URL to identify and login a customer.

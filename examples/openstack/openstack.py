@@ -82,7 +82,7 @@ if __name__ == "__main__":
     run = Runabove(application_key, application_secret, consumer_key)
 
     # get a token
-    token = run.token.get()
+    token = run.tokens.get()
 
     # demo: novaclient --> list VMs
     nova = get_novaclient(token, region)

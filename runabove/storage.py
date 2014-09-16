@@ -89,7 +89,7 @@ class ContainerManager(BaseManagerWithList):
 
     def _get_swift_client(self, region_name):
         """Get the swift client for a region."""
-        token = self._handler.token.get()
+        token = self._handler.tokens.get()
         endpoint = token.get_endpoint('object-store', region_name)
         client = swiftclient.client.Connection(preauthurl=endpoint['url'],
                                                preauthtoken=token.auth_token)

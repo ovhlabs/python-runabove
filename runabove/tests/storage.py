@@ -174,7 +174,7 @@ class TestContainerManager(unittest.TestCase):
 
     @mock.patch('swiftclient.client.Connection')
     def test_get_swift_client(self, mock_swiftclient):
-        mock_get_token = self.containers._handler.token.get
+        mock_get_token = self.containers._handler.tokens.get
         mock_get_token.return_value.auth_token = 'token'
         mock_get_token.return_value.endpoint = 'http://url'
 
@@ -182,7 +182,7 @@ class TestContainerManager(unittest.TestCase):
         mock_get_token.assert_called_once_with()
         mock_get_token.return_value.get_endpoint.assert_called_once_with('object-store', 'REGION-1')
         self.assertIsInstance(swift, dict)
-        self.assertEqual(['client', 'endpoint'], list(swift.keys()))
+        self.assertEqual(['client', 'endpoint'], sorted(swift.keys()))
 
     @mock.patch('swiftclient.client.Connection')
     def test_swift_call(self, mock_swiftclient):
