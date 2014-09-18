@@ -36,6 +36,7 @@ from .image import ImageManager
 from .instance import InstanceManager
 from .storage import ContainerManager
 from .account import AccountManager
+from .token import TokenManager
 
 
 class Runabove(object):
@@ -64,6 +65,7 @@ class Runabove(object):
         self.instances = InstanceManager(self._api, self)
         self.account = AccountManager(self._api, self)
         self.containers = ContainerManager(self._api, self)
+        self.tokens = TokenManager(self._api, self)
 
     def get_login_url(self, access_rules=None, redirect_url=None):
         """Get the URL to identify and login a customer.
@@ -88,3 +90,4 @@ class Runabove(object):
         """Get the current consumer key to communicate with the API."""
 
         return self._api.consumer_key
+

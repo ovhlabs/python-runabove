@@ -172,33 +172,17 @@ class TestContainerManager(unittest.TestCase):
         self.assertIsInstance(container, runabove.storage.Container)
         self.assertEqual(container.name, self.name)
 
-    def test_get_endpoint(self):
-        self.mock_wrapper.get.return_value = json.loads(self.answer_token)
-        result = self.containers._get_endpoints()
-        self.mock_wrapper.get.assert_called_once_with('/token')
-        self.assertIsInstance(result, tuple)
-        self.assertEqual(len(result), 2)
-        for endpoint in result[0]:
-            self.assertIsInstance(endpoint, dict)
-            self.assertIsInstance(endpoint['url'], unicode)
-            self.assertIsInstance(endpoint['region'], unicode)
-
-    def test_get_endpoint_without_object_storage(self):
-        self.mock_wrapper.get.return_value = json.loads(
-            self.answer_token_empty
-        )
-        with self.assertRaises(runabove.exception.ResourceNotFoundError):
-            result = self.containers._get_endpoints()
-            self.mock_wrapper.get.assert_called_once_with('/token')
-
-    @mock.patch('runabove.storage.ContainerManager._get_endpoints')
     @mock.patch('swiftclient.client.Connection')
-    def test_get_swift_clients(self, mock_get_endpoints, mock_swiftclient):
-        endpoints = ([{'url': 'http://url', 'region': 'BHS-1'}], 'token')
-        self.containers._get_endpoints.return_value = endpoints
-        swifts = self.containers._get_swift_clients()
-        self.containers._get_endpoints.assert_called_once()
-        self.assertIsInstance(swifts, dict)
+    def test_get_swift_client(self, mock_swiftclient):
+        mock_get_token = self.containers._handler.tokens.get
+        mock_get_token.return_value.auth_token = 'token'
+        mock_get_token.return_value.endpoint = 'http://url'
+
+        swift = self.containers._get_swift_client('REGION-1')
+        mock_get_token.assert_called_once_with()
+        mock_get_token.return_value.get_endpoint.assert_called_once_with('object-store', 'REGION-1')
+        self.assertIsInstance(swift, dict)
+        self.assertEqual(['client', 'endpoint'], sorted(swift.keys()))
 
     @mock.patch('swiftclient.client.Connection')
     def test_swift_call(self, mock_swiftclient):
@@ -279,7 +263,7 @@ class TestContainerManager(unittest.TestCase):
                 'endpoint' : 'http://endpoint'
             }
         }
-        self.containers._swifts = swifts
+        self.containers.swifts = swifts
         url = self.containers.get_region_url('BHS-1')
         self.assertEqual(url, 'http://endpoint')
 
@@ -317,11 +301,11 @@ class TestContainerManager(unittest.TestCase):
             content_type=None
         )
 
-    @mock.patch('runabove.storage.ContainerManager._get_swift_clients')
-    def test_swifts(self, mock_get_swift_clients):
-        mock_get_swift_clients.return_value = {}
+    @mock.patch('runabove.storage.ContainerManager._get_swift_client')
+    def test_swifts(self, mock_get_swift_client):
+        mock_get_swift_client.return_value = {}
         swifts = self.containers.swifts
-        mock_get_swift_clients.assert_called_once()
+        mock_get_swift_client.assert_called_once()
         self.assertIsInstance(swifts, dict)
 
 
