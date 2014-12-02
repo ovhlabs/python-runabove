@@ -46,6 +46,7 @@ class FlavorManager(BaseManagerWithList):
                       flavor.get('name'),
                       flavor.get('ram'),
                       flavor.get('vcpus'),
+                      flavor.get('type'),
                       region)
 
     def get_by_name(self, flavor_name):
@@ -74,11 +75,12 @@ class Flavor(Resource):
     """Represents one flavor."""
 
     def __init__(self, manager, flavor_id, disk,
-                 name, ram, vcpus, region):
+                 name, ram, vcpus, type, region):
         self._manager = manager
         self.id = flavor_id
         self.disk = disk
         self.name = name
         self.ram = ram
         self.vcpus = vcpus
+        self.type = type
         self.region = region
