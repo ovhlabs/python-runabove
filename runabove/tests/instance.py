@@ -72,13 +72,27 @@ class TestInstance(unittest.TestCase):
             "name": "pci2.d.c1",
             "ram": 16384,
             "vcpus": 6,
-            "region": "BHS-1"
+            "region": "BHS-1",
+            "type": "ra.sb"
         },
         "image": {
             "id": "82a56d09-882d-48cc-82ce-eef59820879f",
             "name": "Debian 7",
-            "region": "BHS-1"
+            "region": "BHS-1",
+            "visibility": "public"
         },
+        "sshKey": null,
+        "region": "BHS-1"
+    }'''
+
+    answer_one_without_flavor_nor_image_nor_key = '''{
+        "instanceId": "8c687d5d-a1c7-4670-aca8-65acfb23ab44",
+        "name": "Test",
+        "ipv4": "192.168.0.3",
+        "created": "2014-06-01T09:13:15Z",
+        "status": "ACTIVE",
+        "flavor": null,
+        "image": null,
         "sshKey": null,
         "region": "BHS-1"
     }'''
@@ -156,6 +170,16 @@ class TestInstance(unittest.TestCase):
     def test_get_by_id(self):
         self.mock_wrapper.encode_for_api.return_value = self.instance_id
         self.mock_wrapper.get.return_value = json.loads(self.answer_one)
+        instance = self.instances.get_by_id(self.instance_id)
+        self.mock_wrapper.get.assert_called_once_with(
+            self.instances.basepath + '/' + self.instance_id
+        )
+        self.assertIsInstance(instance, runabove.instance.Instance)
+
+    def test_get_by_id_without_flavor_nor_image_nor_key(self):
+        answer = self.answer_one_without_flavor_nor_image_nor_key
+        self.mock_wrapper.encode_for_api.return_value = self.instance_id
+        self.mock_wrapper.get.return_value = json.loads(answer)
         instance = self.instances.get_by_id(self.instance_id)
         self.mock_wrapper.get.assert_called_once_with(
             self.instances.basepath + '/' + self.instance_id
@@ -289,17 +313,45 @@ class TestInstanceObject(unittest.TestCase):
         self.instance.vnc
         self.mock_instances.vnc.assert_called_once()
 
-    def test_get_flavor(self):
+    def test_get_flavor_not_in_cache(self):
         self.instance.flavor
         self.mock_instances._handler.flavors.get_by_id.assert_called_once_with(
             self.instance._flavor_id
         )
 
-    def test_get_image(self):
+    def test_get_flavor_none(self):
+        self.instance._flavor = False
+        res = self.instance.flavor
+        self.assertEquals(res, None)
+
+    def test_get_flavor_404(self):
+        self.mock_instances._handler.flavors.get_by_id.side_effect=\
+            runabove.exception.ResourceNotFoundError
+        res = self.instance.flavor
+        self.mock_instances._handler.flavors.get_by_id.assert_called_once_with(
+            self.instance._flavor_id
+        )
+        self.assertEquals(res, None)
+
+    def test_get_image_not_in_cache(self):
         self.instance.image
         self.mock_instances._handler.images.get_by_id.assert_called_once_with(
             self.instance._image_id
         )
+
+    def test_get_image_none(self):
+        self.instance._image = False
+        res = self.instance.image
+        self.assertEquals(res, None)
+
+    def test_get_image_404(self):
+        self.mock_instances._handler.images.get_by_id.side_effect=\
+            runabove.exception.ResourceNotFoundError
+        res = self.instance.image
+        self.mock_instances._handler.images.get_by_id.assert_called_once_with(
+            self.instance._image_id
+        )
+        self.assertEquals(res, None)
 
     def test_get_ssh_key(self):
         self.instance.ssh_key

@@ -29,6 +29,7 @@
 from __future__ import absolute_import
 
 from .base import Resource, BaseManagerWithList
+from .exception import ResourceNotFoundError
 
 
 class InstanceManager(BaseManagerWithList):
@@ -79,7 +80,8 @@ class InstanceManager(BaseManagerWithList):
         The enhanced dict got with the GET of one instance allows
         to build the flavor, image and SSH key objects directly
         without making a call for each of them. However SSH key
-        is not mandatory so can be None.
+        is not mandatory so can be None. Flavor and Image can also
+        be None when they have been removed from the infra.
         """
         try:
             ssh_key_name = ins['sshKey']['name']
@@ -88,15 +90,25 @@ class InstanceManager(BaseManagerWithList):
             ssh_key_name = None
             ssh_key = None
         region = self._handler.regions._name_to_obj(ins['region'])
-        flavor = self._handler.flavors._dict_to_obj(ins['flavor'])
-        image = self._handler.images._dict_to_obj(ins['image'])
+        if ins['flavor']:
+            flavor_id = ins['flavor']['id']
+            flavor = self._handler.flavors._dict_to_obj(ins['flavor'])
+        else:
+            flavor_id = None
+            flavor = False
+        if ins['image']:
+            image_id = ins['image']['id']
+            image = self._handler.images._dict_to_obj(ins['image'])
+        else:
+            image_id = None
+            image = False
         return Instance(self,
                         ins['instanceId'],
                         ins.get('name'),
                         ins.get('ipv4'),
                         region,
-                        ins['flavor']['id'],
-                        ins['image']['id'],
+                        flavor_id,
+                        image_id,
                         ssh_key_name,
                         ins.get('status'),
                         ins.get('created'),
@@ -193,18 +205,44 @@ class Instance(Resource):
 
     @property
     def flavor(self):
-        """Lazy loading of flavor object."""
+        """Lazy loading of flavor object.
+
+        The flavor associated to an instance can be deleted, thus giving
+        a 404 when requested. The following convention applies:
+        self._flavor is False, flavor is a 404, returns None
+        self._flavor is None, did not request the falvor yet
+        self._flavor is Flavor, the flavor object, returns Flavor
+        """
+        if self._flavor is False:
+            return None
         if not self._flavor:
-            self._flavor = self._manager._handler.\
-                flavors.get_by_id(self._flavor_id)
+            try:
+                self._flavor = self._manager._handler.\
+                    flavors.get_by_id(self._flavor_id)
+            except ResourceNotFoundError as e:
+                self._flavor = False
+                return None
         return self._flavor
 
     @property
     def image(self):
-        """Lazy loading of image object."""
+        """Lazy loading of image object.
+
+        The image associated to an instance can be deleted, thus giving
+        a 404 when requested. The following convention applies:
+        self._image is False, image is a 404, returns None
+        self._image is None, did not request the image yet
+        self._image is Image, the image object, returns Image
+        """
+        if self._image is False:
+            return None
         if not self._image:
-            self._image = self._manager._handler.\
-                images.get_by_id(self._image_id)
+            try:
+                self._image = self._manager._handler.\
+                    images.get_by_id(self._image_id)
+            except ResourceNotFoundError:
+                self._image = False
+                return None
         return self._image
 
     @property
