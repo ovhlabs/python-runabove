@@ -62,15 +62,17 @@ class ImageManager(BaseManagerWithList):
         return Image(self,
                      key['id'],
                      key.get('name'),
-                     region=region)
+                     region,
+                     key['visibility'])
 
 
 class Image(Resource):
     """Represents one image."""
 
-    def __init__(self, manager, id, name, region):
+    def __init__(self, manager, id, name, region, visibility):
         self._manager = manager
         self.id = id
         self.name = name
         self.region = region
+        self.visibility = visibility
 

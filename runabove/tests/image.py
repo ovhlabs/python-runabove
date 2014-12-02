@@ -37,12 +37,14 @@ class TestImage(unittest.TestCase):
         {
             "id": "fedora",
             "name": "Fedora 20",
-            "region": "BHS-1"
+            "region": "BHS-1",
+            "visibility": "public"
         },
         {
             "id": "centos",
             "name": "CentOS 6",
-            "region": "BHS-1"
+            "region": "BHS-1",
+            "visibility": "private"
         }
     ]'''
 
@@ -53,6 +55,7 @@ class TestImage(unittest.TestCase):
         "creationDate": "2014-04-15T12:10:05Z",
         "minDisk": 240,
         "minRam": 0,
+        "visibility": "private",
         "region": "BHS-1"
     }'''
 
