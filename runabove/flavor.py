@@ -65,11 +65,9 @@ class FlavorManager(BaseManagerWithList):
         :param flavor_id: ID of the flavor to retrieve
         :raises ResourceNotFoundError: Flavor does not exist
         """
-        for flavor in self.list():
-            if flavor.id == flavor_id:
-                return flavor
-        raise ResourceNotFoundError(msg='Flavor %s does not exist'
-                                        % flavor_id)
+        url = self.basepath + '/' + self._api.encode_for_api(flavor_id)
+        flavor = self._api.get(url)
+        return self._dict_to_obj(flavor)
 
 
 class Flavor(Resource):
