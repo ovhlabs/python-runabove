@@ -29,7 +29,6 @@
 from __future__ import absolute_import
 
 import functools
-import mimetypes
 
 try:
     from urllib import quote as urllib_quote
@@ -192,12 +191,10 @@ class ContainerManager(BaseManagerWithList):
 
     def copy_object(self, region, from_container, stored_object,
                     to_container=None, new_object_name=None):
-        """Copy an object from a container to another one.
+        """Server copy an object from a container to another one.
 
         Containers must be in the same region. Both containers may be
-        the same. Content-Type is read from the original object if
-        available, otherwise it is guessed with file name, defaults to
-        None if impossible to guess.
+        the same. Meta-data is read and copied from the original object.
 
         :param region: Region where the containers are
         :param from_container: Container where the original object is
@@ -217,10 +214,8 @@ class ContainerManager(BaseManagerWithList):
             from_container_name = from_container
         try:
             stored_object_name = stored_object.name
-            content_type = stored_object.content_type
         except AttributeError:
             stored_object_name = stored_object
-            content_type = mimetypes.guess_type(stored_object_name)[0]
         if to_container:
             try:
                 to_container_name = to_container.name
@@ -231,15 +226,15 @@ class ContainerManager(BaseManagerWithList):
         if not new_object_name:
             new_object_name = stored_object_name
         original_location = '/%s/%s'%(from_container_name, stored_object_name)
-        headers = {'X-Copy-From': original_location}
+        headers = stored_object.meta
+        headers['X-Copy-From'] = original_location
+        headers['content-length'] = 0
         self._swift_call(region_name,
                          'put_object',
                          to_container_name,
                          new_object_name,
                          None,
-                         headers=headers,
-                         content_length=0,
-                         content_type=content_type)
+                         headers=headers)
 
 
 class Container(Resource):
@@ -249,8 +244,6 @@ class Container(Resource):
                  number_objects, region, public=None):
         self._manager = manager
         self.name = name
-        self.size = size
-        self.number_objects = number_objects
         self.region = region
         self._is_public = public
 
@@ -268,20 +261,11 @@ class Container(Resource):
 
     def _dict_to_obj(self, obj):
         """Converts a dict to a ObjectStored object."""
-        return ObjectStored(self,
-                            obj.get('name'),
-                            obj.get('bytes'),
-                            obj.get('last_modified'),
-                            obj.get('content_type'))
+        return ObjectStored(self, obj.get('name'))
 
-    def _en_dict_to_obj(self, name, info, data=None):
+    def _en_dict_to_obj(self, name, meta, data=None):
         """Converts a dict to a ObjectStored object."""
-        return ObjectStored(self,
-                            name,
-                            info.get('content-length'),
-                            info.get('last-modified'),
-                            info.get('content-type'),
-                            data=data)
+        return ObjectStored(self, name, meta=meta, data=data)
 
     def list_objects(self):
         """List objects of a container."""
@@ -329,23 +313,20 @@ class Container(Resource):
                                   self.name,
                                   object_name)
 
-    def create_object(self, object_name, content, content_type=None):
+    def create_object(self, object_name, content, meta=None):
         """Upload an object to a container.
 
         :param object_name: Name of the object to create
         :param content: Content to upload, can be a string or a file-like
             object
-        :param content_type: Content-type of the object, if None it will be
-            computed with the extension of object name
+        :param meta: A dict containing additional headers
         """
-        if not content_type:
-            content_type = mimetypes.guess_type(object_name)[0]
         self._manager._swift_call(self.region.name,
                                   'put_object',
                                   self.name,
                                   object_name,
                                   content,
-                                  content_type=content_type)
+                                  headers=meta)
         return self.get_object_by_name(object_name)
 
     def copy_object(self, stored_object, to_container=None,
@@ -385,13 +366,10 @@ class Container(Resource):
 class ObjectStored(Resource):
     """Represents one swift object."""
 
-    def __init__(self, container, name, size, last_modified,
-                 content_type, data=None):
+    def __init__(self, container, name, meta=None, data=None):
         self.container = container
         self.name = name
-        self.size = size
-        self.last_modified = last_modified
-        self.content_type = content_type
+        self._meta = meta
         self._data = data
 
     @property
@@ -403,6 +381,27 @@ class ObjectStored(Resource):
                     download=True
                 )._data
         return self._data
+
+    @property
+    def meta(self):
+        """Lazy loading of metadata of an object."""
+        if not self._meta:
+            self._meta  = self.container.get_object_by_name(
+                    self.name,
+                    download=False
+                )._meta
+        return self._meta
+
+    @meta.setter
+    def meta(self, meta):
+        """Sets an object metadata."""
+        self.container._manager._swift_call(
+            self.container.region.name,
+            'post_object',
+            self.container.name,
+            self.name,
+            meta
+        )
 
     @property
     def url(self):
