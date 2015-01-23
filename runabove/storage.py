@@ -50,7 +50,7 @@ class ContainerManager(BaseManagerWithList):
         super(ContainerManager, self).__init__(*args, **kwargs)
         self.swifts = {}
 
-    def get_by_name(self, region, container_name):
+    def get_by_name(self, region, container_name, list_objects=False):
         """Get a container by its name.
 
         As two containers with the same name can exist in two
@@ -62,29 +62,23 @@ class ContainerManager(BaseManagerWithList):
             region_name = region.name
         except AttributeError:
             region_name = region
-        content = {'region': region_name}
-        url = self.basepath + '/' + self._api.encode_for_api(container_name)
-        res = self._api.get(url, content)
-        return self._en_dict_to_obj(res, region_name)
+        res = self._swift_call(region_name,
+                               'head_container',
+                                container_name)
+        return self._en_dict_to_obj(container_name, region_name, res)
 
     def _dict_to_obj(self, container):
         """Converts a dict to a container object."""
         region = self._handler.regions._name_to_obj(container['region'])
-        return Container(self,
-                         container['name'],
-                         container.get('stored'),
-                         container.get('totalObjects'),
-                         region)
+        return Container(self, container['name'], region)
 
-    def _en_dict_to_obj(self, container, region_name):
+    def _en_dict_to_obj(self, container_name, region_name, meta):
         """Converts a dict to a container object."""
         region = self._handler.regions._name_to_obj(region_name)
         return Container(self,
-                         container['name'],
-                         container.get('stored'),
-                         container.get('totalObjects'),
+                         container_name,
                          region,
-                         public=container.get('public'))
+                         meta=meta)
 
     def _get_swift_client(self, region_name):
         """Get the swift client for a region."""
@@ -214,8 +208,10 @@ class ContainerManager(BaseManagerWithList):
             from_container_name = from_container
         try:
             stored_object_name = stored_object.name
+            headers = stored_object.meta
         except AttributeError:
             stored_object_name = stored_object
+            headers = {}
         if to_container:
             try:
                 to_container_name = to_container.name
@@ -226,7 +222,6 @@ class ContainerManager(BaseManagerWithList):
         if not new_object_name:
             new_object_name = stored_object_name
         original_location = '/%s/%s'%(from_container_name, stored_object_name)
-        headers = stored_object.meta
         headers['X-Copy-From'] = original_location
         headers['content-length'] = 0
         self._swift_call(region_name,
@@ -240,20 +235,32 @@ class ContainerManager(BaseManagerWithList):
 class Container(Resource):
     """Represents one container."""
 
-    def __init__(self, manager, name, size,
-                 number_objects, region, public=None):
+    def __init__(self, manager, name, region, meta=None):
         self._manager = manager
         self.name = name
         self.region = region
-        self._is_public = public
+        self._meta = meta
 
     @property
-    def is_public(self):
-        """Lazy loading of public state."""
-        if self._is_public is None:
-            self._is_public = self._manager.\
-                get_by_name(self.region.name, self.name)._is_public
-        return self._is_public
+    def meta(self):
+        """Lazy loading of metadata of a container."""
+        if not self._meta:
+            self._meta  = self._manager.get_by_name(
+                    self.region.name,
+                    self.name,
+                    list_objects=False
+                )._meta
+        return self._meta
+
+    @meta.setter
+    def meta(self, meta):
+        """Sets a container metadata."""
+        self._manager._swift_call(
+            self.region.name,
+            'post_container',
+            self.name,
+            meta
+        )
 
     def delete(self):
         """Delete the container."""
