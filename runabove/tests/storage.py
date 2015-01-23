@@ -161,17 +161,6 @@ class TestContainerManager(unittest.TestCase):
             self.assertIsInstance(container.region, runabove.region.Region)
             self.assertEqual(container.region.name, self.region)
 
-    def test_get_by_name(self):
-        self.mock_wrapper.get.return_value = json.loads(self.answer_one)
-        container = self.containers.get_by_name(self.region, self.name)
-        self.mock_wrapper.get.assert_called_once_with(
-            self.containers.basepath + '/' +
-            self.containers._api.encode_for_api(self.name),
-            {'region': self.region}
-        )
-        self.assertIsInstance(container, runabove.storage.Container)
-        self.assertEqual(container.name, self.name)
-
     @mock.patch('swiftclient.client.Connection')
     def test_get_swift_client(self, mock_swiftclient):
         mock_get_token = self.containers._handler.tokens.get
@@ -194,6 +183,17 @@ class TestContainerManager(unittest.TestCase):
         }
         self.containers._swifts = swifts
         self.containers._swift_call('BHS-1', 'put_container')
+
+    @mock.patch('runabove.storage.ContainerManager._swift_call')
+    def test_get_by_name(self, mock_swift_call):
+        container = self.containers.get_by_name(self.region, self.name)
+        mock_swift_call.assert_called_once_with(
+            self.region,
+            'head_container',
+            self.name
+        )
+        self.assertIsInstance(container, runabove.storage.Container)
+        self.assertEqual(container.name, self.name)
 
     @mock.patch('runabove.storage.ContainerManager._swift_call')
     def test_delete(self, mock_swift_call):
@@ -275,30 +275,34 @@ class TestContainerManager(unittest.TestCase):
     @mock.patch('runabove.storage.ContainerManager._swift_call')
     def test_copy_object(self, mock_swift_call):
         self.containers.copy_object(self.region, self.name, 'Test')
+        headers = {
+            'X-Copy-From': '/' + self.name + '/Test',
+            'content-length': 0
+        }
         mock_swift_call.assert_called_once_with(
             self.region,
             'put_object',
             self.name,
             'Test',
             None,
-            headers = {'X-Copy-From': '/' + self.name + '/Test'},
-            content_length=0,
-            content_type=None
+            headers=headers
         )
 
     @mock.patch('runabove.storage.ContainerManager._swift_call')
     def test_copy_object_other_container(self, mock_swift_call):
         self.containers.copy_object(self.region, self.name, 'Test',
                                     to_container='test1')
+        headers = {
+            'X-Copy-From': '/' + self.name + '/Test',
+            'content-length': 0
+        }
         mock_swift_call.assert_called_once_with(
             self.region,
             'put_object',
             'test1',
             'Test',
             None,
-            headers = {'X-Copy-From': '/' + self.name + '/Test'},
-            content_length=0,
-            content_type=None
+            headers=headers
         )
 
     @mock.patch('runabove.storage.ContainerManager._get_swift_client')
@@ -366,9 +370,8 @@ class TestContainer(unittest.TestCase):
         self.container = runabove.storage.Container(
             self.mock_containers,
             self.container_name,
-            1024,
-            5,
-            self.mock_region
+            self.mock_region,
+            meta=None
         )
 
     def test_list_objects(self):
@@ -428,10 +431,8 @@ class TestContainer(unittest.TestCase):
             'Test'
         )
 
-    @mock.patch('mimetypes.guess_type')
     @mock.patch('runabove.storage.Container.get_object_by_name')
-    def test_create_object(self, mock_get_object_by_name, mock_guess_type):
-        mock_guess_type.return_value = ('application/json',)
+    def test_create_object(self, mock_get_object_by_name):
         obj = self.container.create_object('Test', 'content')
         self.mock_containers._swift_call.assert_called_once_with(
             self.mock_region.name,
@@ -439,7 +440,7 @@ class TestContainer(unittest.TestCase):
             self.container.name,
             'Test',
             'content',
-            content_type='application/json'
+            headers=None
         )
 
     @mock.patch('runabove.storage.ObjectStored')
@@ -453,13 +454,6 @@ class TestContainer(unittest.TestCase):
             mock_obj,
             to_container,
             new_object_name
-        )
-
-    def test_is_public(self):
-        result = self.container.is_public
-        self.mock_containers.get_by_name.assert_called_once_with(
-            self.mock_region.name,
-            self.container.name
         )
 
     def test_set_public(self):
@@ -485,6 +479,23 @@ class TestContainer(unittest.TestCase):
         )
         self.assertEqual(url, base_url + '/' + self.container_name)
 
+    @mock.patch('runabove.storage.Container')
+    def test_get_meta(self, mock_cnt):
+        fake_meta = {'X-meta': 'meta'}
+        mock_cnt._meta = fake_meta
+        self.mock_containers.get_by_name.return_value = mock_cnt
+        meta = self.container.meta
+        self.mock_containers.get_by_name.assert_called_once_with(
+            self.mock_region.name,
+            self.container.name,
+            list_objects=False
+        )
+        self.assertEqual(meta, fake_meta)
+
+    def test_set_meta(self):
+        fake_meta = {'X-meta': 'meta'}
+        self.container.meta = fake_meta
+
 
 class TestObjectStored(unittest.TestCase):
 
@@ -495,10 +506,7 @@ class TestObjectStored(unittest.TestCase):
         self.mock_container = mock_container
         self.obj = runabove.storage.ObjectStored(
             self.mock_container,
-            self.obj_name,
-            1024,
-            'Thu, 31 Jul 2014 07:57:30 GMT',
-            'image/png'
+            self.obj_name
         )
 
     @mock.patch('runabove.storage.ObjectStored')
@@ -512,6 +520,23 @@ class TestObjectStored(unittest.TestCase):
             download=True
         )
         self.assertEqual(data, fake_data)
+
+    @mock.patch('runabove.storage.ObjectStored')
+    def test_get_meta(self, mock_obj):
+        fake_meta = {'X-meta': 'meta'}
+        mock_obj._meta = fake_meta
+        self.mock_container.get_object_by_name.return_value = mock_obj
+        meta = self.obj.meta
+        self.mock_container.get_object_by_name.assert_called_once_with(
+            self.obj.name,
+            download=False
+        )
+        self.assertEqual(meta, fake_meta)
+
+    @mock.patch('runabove.storage.ContainerManager._swift_call')
+    def test_set_meta(self, mock_swift_call):
+        fake_meta = {'X-meta': 'meta'}
+        self.obj.meta = fake_meta
 
     @mock.patch('runabove.storage.ObjectStored')
     def test_data_already_downloaded(self, mock_obj):
