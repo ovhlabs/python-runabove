@@ -30,7 +30,7 @@ import setuptools
 
 setuptools.setup(
     name='python-runabove',
-    version='1.2.0',
+    version='1.3.0',
     author='RunAbove',
     author_email='dev@runabove.com',
     url='https://www.runabove.com/',
@@ -40,7 +40,7 @@ setuptools.setup(
     packages=['runabove'],
     test_suite='runabove.tests',
     install_requires=[
-        'python-swiftclient>=2.1.0',
-        'requests>=1.1'
+        'python-swiftclient>=2.3.1',
+        'requests>=2.5.1'
     ]
 )
